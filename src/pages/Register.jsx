@@ -24,8 +24,8 @@ function Register() {
         try {
             const data = await register(form);
 
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            sessionStorage.setItem('token', data.token);
+            sessionStorage.setItem('user', JSON.stringify(data.user));
 
             alert('¡Registro correcto!');
             console.log(data);
