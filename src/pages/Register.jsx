@@ -35,20 +35,44 @@ function Register() {
     };
 
     return (
-        <div>
-            <h2>Registro</h2>
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="name" placeholder="Nombre" onChange={handleChange} required /> <br /> <br />
-                <input type="text" name="lastName" placeholder="Apellido" onChange={handleChange} required /> <br /> <br />
-                <input type="number" name="age" placeholder="Edad" onChange={handleChange} required /> <br /> <br />
-                <input type="tel" name="phone" placeholder="Teléfono" onChange={handleChange} required /> <br /> <br />
-                <input type= "email" name="email" placeholder="Email" onChange={handleChange} required /> <br /> <br />
-                <input type="password" name="password" placeholder="Contraseña" onChange={handleChange} required /><br /> <br />
+        <div className="flex min-h-[80vh] items-center justify-center">
+            <div className="w-full max-w-3xl rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-slate-200 sm:p-10">
+                <div className="mb-8 text-center">
+                    <h2 className="text-3xl font-bold text-slate-900">Crear cuenta</h2>
+                    <p className="mt-2 text-slate-500">Registra un nuevo usuario en el sistema TicoAutos</p>
+                </div>
+                <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2">
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Nombre</label>
+                        <input type="text" name="name" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Apellido</label>
+                        <input type="text" name="lastName" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Edad</label>
+                        <input type="number" name="age" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Teléfono</label>
+                        <input type="text" name="phone" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Correo electrónico</label>
+                        <input type="email" name="email" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Contraseña</label>
+                        <input type="password" name="password" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
 
-                <button type="submit">Registrarse</button>
-            </form> 
+                    <div className="md:col-span-2">
+                        <button type="submit" className="w-full rounded-xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700 transition">Registrarse</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    
     );
 }
 
