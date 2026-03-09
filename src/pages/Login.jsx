@@ -23,8 +23,7 @@ function Login() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
 
-            alert('¡Login correcto!');
-            console.log(data);
+            alert('¡Login correcto!');;
         } catch (error) {
             alert(error.response?.data?.message || 'Error al iniciar sesión');
         }
