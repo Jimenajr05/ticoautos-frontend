@@ -1,20 +1,20 @@
 import {Routes, Route, Link} from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <div style = {{padding: '20px'}}>
-      <nav style = {{marginBottom: '20px'}}>
-       <Link to="/register" style={{ marginRight: '10px' }}>Register</Link>
-       <Link to="/login">Login</Link>
-      </nav>
-      <Routes>
-        <Route path="/" element={<h2>Welcome to TicoAutos!</h2>} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </div>
+    <div className="min-h-screen bg-slate-100">
+      <Navbar />
+      <div className="p-6">
+        <Routes>
+            <Route path="/" element={<h2 className="text-3xl font-bold text-center">¡Bienvenidos a TicoAutos!</h2>} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+        </Routes>
+      </div>
+    </div>    
   );
 }
 
