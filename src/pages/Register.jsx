@@ -1,7 +1,10 @@
 import {useState} from "react";
 import {register} from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         name: "",
         lastName: "",
@@ -9,7 +12,7 @@ function Register() {
         phone: "",
         email: "",
         password: "",
-        ProfileImage: null
+        profileImage: null
     });
 
     const handleChange = (e) => {
@@ -50,6 +53,7 @@ function Register() {
             sessionStorage.setItem('user', JSON.stringify(data.user));
 
             alert('¡Registro correcto!');
+            navigate('/login');
             console.log(data);
         } catch (error) {
             alert(error.response?.data?.message || 'Error al registrar');
