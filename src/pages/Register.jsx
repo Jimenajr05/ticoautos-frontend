@@ -8,21 +8,43 @@ function Register() {
         age: "",
         phone: "",
         email: "",
-        password: ""
+        password: "",
+        ProfileImage: null
     });
 
     const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
+        const { name, value, files } = e.target;
+        if (name === "profileImage") {
+            setForm({
+                ...form,
+                profileImage: files[0]
+            });
+        } else {
+            setForm({
+                ...form,
+                [name]: value
+            });
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const data = await register(form);
+            const formData = new FormData();
+
+            formData.append("name", form.name);
+            formData.append("lastName", form.lastName);
+            formData.append("age", form.age);
+            formData.append("phone", form.phone);
+            formData.append("email", form.email);
+            formData.append("password", form.password);
+
+            if (form.profileImage) {
+                formData.append("profileImage", form.profileImage);
+            }
+
+            const data = await register(formData);
 
             sessionStorage.setItem('token', data.token);
             sessionStorage.setItem('user', JSON.stringify(data.user));
@@ -65,6 +87,11 @@ function Register() {
                     <div>
                         <label className="mb-2 block text-sm font-medium text-slate-700">Contraseña</label>
                         <input type="password" name="password" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <label className="mb-2 block text-sm font-medium text-slate-700">Foto de perfil</label>
+                        <input type="file" name="profileImage" accept="image/*" onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-3"/>
                     </div>
 
                     <div className="md:col-span-2">
