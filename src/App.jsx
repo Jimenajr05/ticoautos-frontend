@@ -1,7 +1,9 @@
 import {Routes, Route, Link} from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import GestionarVehicle from './pages/GestionarVehicle';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 
 function App() {
   return (
@@ -9,9 +11,10 @@ function App() {
       <Navbar />
       <div className="p-6">
         <Routes>
-            <Route path="/" element={<h2 className="text-3xl font-bold text-center">¡Bienvenidos a TicoAutos!</h2>} />
+            <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/gestionarVehicle" element={<GestionarVehicle />} />
         </Routes>
       </div>
     </div>    
