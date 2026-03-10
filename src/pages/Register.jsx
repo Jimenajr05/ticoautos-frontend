@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {register} from "../services/authService";
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 function Register() {
     const navigate = useNavigate();
@@ -96,6 +96,10 @@ function Register() {
                     <div className="md:col-span-2">
                         <label className="mb-2 block text-sm font-medium text-slate-700">Foto de perfil</label>
                         <input type="file" name="profileImage" accept="image/*" onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-4 py-3"/>
+                    </div>
+
+                    <div className="mt-4 flex justify-center">
+                        <p className="text-center text-sm text-slate-600">¿Ya tienes una cuenta? <Link to="/login" className="font-semibold text-blue-600 hover:underline">Inicia sesión aquí</Link></p>
                     </div>
 
                     <div className="md:col-span-2">
