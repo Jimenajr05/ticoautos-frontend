@@ -1,7 +1,10 @@
 import {useState} from "react";
 import {login} from "../services/authService";
+import {Link, useNavigate} from "react-router-dom";
 
 function Login() {
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         email: "",
         password: ""
@@ -20,10 +23,11 @@ function Login() {
         try {
             const data = await login(form);
 
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
+            sessionStorage.setItem('token', data.token);
+            sessionStorage.setItem('user', JSON.stringify(data.user));
 
-            alert('¡Login correcto!');;
+            alert('¡Login correcto!');
+            navigate('/gestionarVehicle');
         } catch (error) {
             alert(error.response?.data?.message || 'Error al iniciar sesión');
         }
@@ -54,6 +58,8 @@ function Login() {
                                 <label className="mb-2 block text-sm font-medium text-slate-700">Contraseña</label>
                                 <input type="password" name="password" placeholder="" onChange={handleChange} required className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" />
                             </div>
+
+                            <p className="text-center text-sm text-slate-600">¿No tienes una cuenta? <Link to="/register" className="font-semibold text-blue-600 hover:underline">Regístrate aquí</Link></p>
                             
                             <button type="submit" className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-md transition hover:bg-blue-700">Entrar al sistema</button>
                     </form>
