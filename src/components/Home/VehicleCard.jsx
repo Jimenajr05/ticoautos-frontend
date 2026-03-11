@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function VehicleCard({ vehicle }) {
     return (
@@ -11,7 +11,9 @@ function VehicleCard({ vehicle }) {
                         className="h-64 w-full object-cover"
                     />
                 ) : (
-                    <div className="flex h-64 items-center justify-center bg-slate-200 text-slate-500">Sin imagen</div>
+                    <div className="flex h-64 items-center justify-center bg-slate-200 text-slate-500">
+                        Sin imagen
+                    </div>
                 )}
 
                 <span
@@ -26,7 +28,7 @@ function VehicleCard({ vehicle }) {
             </div>
 
             <div className="p-6">
-               <div className="mb-4">
+                <div className="mb-4">
                     <h4 className="text-xl font-bold text-slate-900">
                         {vehicle.title}
                     </h4>
@@ -37,20 +39,27 @@ function VehicleCard({ vehicle }) {
                         <div><span className="font-semibold">Año:</span> {vehicle.year}</div>
                     </div>
                 </div>
-                
+
                 <div className="mb-4">
-                    <p className="text-2xl font-extrabold text-blue-600">₡{Number(vehicle.price).toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-blue-600">
+                        ₡{vehicle.price ? Number(vehicle.price).toLocaleString() : "0"}
+                    </p>
                 </div>
 
                 <div className="mb-5 text-sm text-slate-600">
                     <p>
                         <span className="font-semibold">Propietario:</span>{" "}
-                        {vehicle.user?.name} {vehicle.user?.lastName}
+                        {vehicle.user
+                            ? `${vehicle.user.name || ""} ${vehicle.user.lastName || ""}`
+                            : "No disponible"}
                     </p>
                 </div>
 
                 <div className="flex gap-3">
-                    <Link to={`/vehicles/${vehicle._id}`} className="w-full rounded-xl bg-slate-900 px-4 py-3 text-center font-semibold text-white transition hover:bg-slate-800">
+                    <Link
+                        to={`/vehicles/${vehicle._id}`}
+                        className="w-full rounded-xl bg-slate-900 px-4 py-3 text-center font-semibold text-white transition hover:bg-slate-800"
+                    >
                         Ver detalle
                     </Link>
                 </div>

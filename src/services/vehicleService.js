@@ -1,51 +1,72 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = 'http://localhost:3000/api/vehicles';
+const API_URL = "http://localhost:3000/api/vehicles";
 
-const getAuthConfig = () => {
-    const token = sessionStorage.getItem('token');
-    return {
-        headers: {
+export const getVehicles = async (filters = {}) => {
+  const token = sessionStorage.getItem("token");
 
-            Authorization: `Bearer ${token}`
+  const params = {};
+
+  if (filters.brand) params.brand = filters.brand;
+  if (filters.model) params.model = filters.model;
+  if (filters.minPrice) params.minPrice = filters.minPrice;
+  if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+  if (filters.minYear) params.minYear = filters.minYear;
+  if (filters.maxYear) params.maxYear = filters.maxYear;
+  if (filters.status) params.status = filters.status;
+
+  const response = await axios.get(API_URL, {
+    params,
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
         }
-    };
+      : {},
+  });
+
+  return response.data;
 };
 
-export const getVehicles = async (params = {}) => {
-    const response = await axios.get(API_URL,  {params});
-    return response.data;
-}
-
-export const getVehicleById = async (id) => {
-    const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
-}
-
 export const createVehicle = async (vehicleData) => {
-    const response = await axios.post(API_URL, vehicleData, {
-        headers: {
-            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-        },
-    });
-    return response.data;
-}
+  const token = sessionStorage.getItem("token");
+
+  return await axios.post(API_URL, vehicleData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export const updateVehicle = async (id, vehicleData) => {
-    const response = await axios.put(`${API_URL}/${id}`, vehicleData,{
-        headers: {
-            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-        },
-    });
-    return response.data;
-}
+  const token = sessionStorage.getItem("token");
+
+  return await axios.put(`${API_URL}/${id}`, vehicleData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export const deleteVehicle = async (id) => {
-    const response = await axios.delete(`${API_URL}/${id}`, getAuthConfig());
-    return response.data;
-}
+  const token = sessionStorage.getItem("token");
+
+  return await axios.delete(`${API_URL}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export const markVehicleAsSold = async (id) => {
-    const response = await axios.patch(`${API_URL}/${id}/sold`, {}, getAuthConfig());
-    return response.data;
-}
+  const token = sessionStorage.getItem("token");
+
+  return await axios.patch(
+    `${API_URL}/${id}/sold`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
