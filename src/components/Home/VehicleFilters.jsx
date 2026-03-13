@@ -4,10 +4,10 @@ function VehicleFilters({ onFilter }) {
   const [filters, setFilters] = useState({
     brand: "",
     model: "",
-    minPrice: "",
-    maxPrice: "",
     minYear: "",
     maxYear: "",
+    minPrice: "",
+    maxPrice: "",
     status: "available",
   });
 
@@ -19,52 +19,68 @@ function VehicleFilters({ onFilter }) {
   };
 
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (filters.minPrice && filters.maxPrice && Number(filters.minPrice) > Number(filters.maxPrice)) {
-    alert("El precio mínimo no puede ser mayor al precio máximo.");
-    return;
-  }
+    if (
+      filters.minYear &&
+      filters.maxYear &&
+      Number(filters.minYear) > Number(filters.maxYear)
+    ) {
+      alert("El año mínimo no puede ser mayor al año máximo.");
+      return;
+    }
 
-  if (filters.minYear && filters.maxYear && Number(filters.minYear) > Number(filters.maxYear)) {
-    alert("El año mínimo no puede ser mayor al año máximo.");
-    return;
-  }
+    if (
+      filters.minPrice &&
+      filters.maxPrice &&
+      Number(filters.minPrice) > Number(filters.maxPrice)
+    ) {
+      alert("El precio mínimo no puede ser mayor al precio máximo.");
+      return;
+    }
 
-  onFilter(filters);
-};
+    const cleanFilters = {};
+
+    Object.keys(filters).forEach((key) => {
+      if (filters[key] !== "") {
+        cleanFilters[key] = filters[key];
+      }
+    });
+
+    onFilter(cleanFilters);
+  };
 
   const handleClear = () => {
-    const emptyFilters = {
+    setFilters({
       brand: "",
       model: "",
-      minPrice: "",
-      maxPrice: "",
       minYear: "",
       maxYear: "",
-      status: "available",
-    };
-    setFilters(emptyFilters);
-    onFilter(emptyFilters);
+      minPrice: "",
+      maxPrice: "",
+      status: "",
+    });
+
+    onFilter({});
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-2xl shadow-md p-6 mb-8"
+      className="mb-8 rounded-2xl bg-white p-6 shadow"
     >
-      <h2 className="text-2xl font-bold mb-4 text-slate-800">
+      <h2 className="mb-4 text-2xl font-bold text-slate-800">
         Buscar vehículos
       </h2>
 
-      <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <input
           type="text"
           name="brand"
           placeholder="Marca"
           value={filters.brand}
           onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         />
 
         <input
@@ -73,25 +89,7 @@ function VehicleFilters({ onFilter }) {
           placeholder="Modelo"
           value={filters.model}
           onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
-        />
-
-        <input
-          type="number"
-          name="minPrice"
-          placeholder="Precio mínimo"
-          value={filters.minPrice}
-          onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
-        />
-
-        <input
-          type="number"
-          name="maxPrice"
-          placeholder="Precio máximo"
-          value={filters.maxPrice}
-          onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         />
 
         <input
@@ -100,7 +98,7 @@ function VehicleFilters({ onFilter }) {
           placeholder="Año mínimo"
           value={filters.minYear}
           onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         />
 
         <input
@@ -109,25 +107,42 @@ function VehicleFilters({ onFilter }) {
           placeholder="Año máximo"
           value={filters.maxYear}
           onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="minPrice"
+          placeholder="Precio mínimo"
+          value={filters.minPrice}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="maxPrice"
+          placeholder="Precio máximo"
+          value={filters.maxPrice}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         />
 
         <select
           name="status"
           value={filters.status}
           onChange={handleChange}
-          className="border rounded-lg px-4 py-2"
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         >
           <option value="available">Disponible</option>
           <option value="sold">Vendido</option>
-          <option value="">Todos</option>
         </select>
       </div>
 
-      <div className="flex gap-3 mt-4">
+      <div className="mt-5 flex gap-3">
         <button
           type="submit"
-          className="bg-cyan-500 text-white px-5 py-2 rounded-lg hover:bg-cyan-600"
+          className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
         >
           Buscar
         </button>
@@ -135,7 +150,7 @@ function VehicleFilters({ onFilter }) {
         <button
           type="button"
           onClick={handleClear}
-          className="bg-slate-300 text-slate-800 px-5 py-2 rounded-lg hover:bg-slate-400"
+          className="rounded-xl bg-slate-300 px-5 py-3 font-semibold text-slate-800 transition hover:bg-slate-400"
         >
           Limpiar
         </button>

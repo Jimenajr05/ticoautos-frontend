@@ -3,11 +3,13 @@ import axios from "axios";
 const API_URL = "http://localhost:3000/api/vehicles";
 
 // Obtener todos los vehículos con filtro
-export const getVehicles = async () => {
+export const getVehicles = async (filters = {}) => {
   const token = sessionStorage.getItem("token");
 
   const response = await axios.get(API_URL, {
-    headers: {
+    params: filters,
+    headers: 
+    {
       Authorization: `Bearer ${token}`,
     },
   });
