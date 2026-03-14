@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import GestionarVehicle from './pages/GestionarVehicle';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import VehicleDetail from "./pages/VehicleDetail";
 
 function Perfil() {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -39,6 +40,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/mis-vehiculos" element={<GestionarVehicle />} />
+        <Route path="/vehicles/:id" element={<VehicleDetail />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>

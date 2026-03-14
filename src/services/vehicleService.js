@@ -30,6 +30,13 @@ export const getMyVehicles = async () => {
   return response.data;
 };
 
+//Obtener Vehiculo por ID
+export const getVehicleById = async (id) => {
+  const response = await axios.get(`${API_URL}/${id}`);
+  return response.data;
+};
+
+
 // Crear vehículo
 export const createVehicle = async (vehicleData) => {
   const token = sessionStorage.getItem("token");
