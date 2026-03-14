@@ -6,6 +6,9 @@ function VehicleDetail() {
   const { id } = useParams();
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = `${window.location.origin}/vehicles/${id}`;
 
   const loadVehicle = async () => {
     try {
@@ -17,6 +20,20 @@ function VehicleDetail() {
       setVehicle(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error al copiar el enlace:", error);
+      alert("No se pudo copiar el enlace.");
     }
   };
 
@@ -102,9 +119,15 @@ function VehicleDetail() {
             </p>
 
             <div className="space-y-3 text-slate-700">
-              <p><span className="font-semibold">Marca:</span> {vehicle.brand}</p>
-              <p><span className="font-semibold">Modelo:</span> {vehicle.model}</p>
-              <p><span className="font-semibold">Año:</span> {vehicle.year}</p>
+              <p>
+                <span className="font-semibold">Marca:</span> {vehicle.brand}
+              </p>
+              <p>
+                <span className="font-semibold">Modelo:</span> {vehicle.model}
+              </p>
+              <p>
+                <span className="font-semibold">Año:</span> {vehicle.year}
+              </p>
               <p>
                 <span className="font-semibold">Descripción:</span>{" "}
                 {vehicle.description || "No disponible"}
@@ -138,6 +161,34 @@ function VehicleDetail() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+              <h2 className="mb-4 text-xl font-bold text-slate-800">
+                Compartir vehículo
+              </h2>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={shareUrl}
+                  readOnly
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-700 outline-none"
+                />
+
+                <button
+                  onClick={handleCopyLink}
+                  className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+                >
+                  Copiar enlace
+                </button>
+              </div>
+
+              {copied && (
+                <p className="mt-3 text-sm font-medium text-green-600">
+                  Enlace copiado correctamente.
+                </p>
+              )}
             </div>
           </div>
         </div>
