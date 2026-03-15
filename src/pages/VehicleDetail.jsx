@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getVehicleById } from "../services/vehicleService";
 
 function VehicleDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -23,6 +25,10 @@ function VehicleDetail() {
     }
   };
 
+  useEffect(() => {
+    loadVehicle();
+  }, [id]);
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -37,9 +43,17 @@ function VehicleDetail() {
     }
   };
 
-  useEffect(() => {
-    loadVehicle();
-  }, [id]);
+  const handleInterestClick = () => {
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      alert("Debes iniciar sesión para contactar al vendedor.");
+      navigate("/login");
+      return;
+    }
+
+    navigate(`/chat?vehicleId=${vehicle._id}`);
+  };
 
   if (loading) {
     return (
@@ -129,6 +143,10 @@ function VehicleDetail() {
                 <span className="font-semibold">Año:</span> {vehicle.year}
               </p>
               <p>
+                <span className="font-semibold">Estado:</span>{" "}
+                {vehicle.status === "sold" ? "Vendido" : "Disponible"}
+              </p>
+              <p>
                 <span className="font-semibold">Descripción:</span>{" "}
                 {vehicle.description || "No disponible"}
               </p>
@@ -161,6 +179,15 @@ function VehicleDetail() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            <div className="mt-8">
+              <button
+                onClick={handleInterestClick}
+                className="w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+              >
+                ¿Te interesa este vehículo?
+              </button>
             </div>
 
             <div className="mt-8 rounded-2xl bg-slate-50 p-5">
