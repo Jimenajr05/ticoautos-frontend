@@ -21,10 +21,7 @@ export const createQuestion = async (vehicleId, question) => {
 
   const response = await axios.post(
     API_URL,
-    {
-      vehicleId,
-      question,
-    },
+    { vehicleId, question },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -51,3 +48,41 @@ export const answerQuestion = async (questionId, answer) => {
   return response.data;
 };
 
+export const getMyQuestions = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await axios.get(`${API_URL}/my-questions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export const getMyVehicleQuestions = async () => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await axios.get(`${API_URL}/my-vehicle-questions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
+export const deleteChatConversation = async (vehicleId, askedById) => {
+  const token = sessionStorage.getItem("token");
+
+  const response = await axios.delete(
+    `${API_URL}/conversation/${vehicleId}/${askedById}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};

@@ -5,6 +5,7 @@ import GestionarVehicle from './pages/GestionarVehicle';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import VehicleDetail from "./pages/VehicleDetail";
+import Chat from "./pages/Chat";
 
 function Perfil() {
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -20,30 +21,21 @@ function Perfil() {
   );
 }
 
-function Chat() {
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white shadow rounded-2xl p-6">
-        <h2 className="text-2xl font-bold mb-4">Chat con usuarios</h2>
-      </div>
-    </div>
-  );
-}
-
 function App() {
   return (
     <div className="min-h-screen bg-slate-100">
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/mis-vehiculos" element={<GestionarVehicle />} />
-        <Route path="/vehicles/:id" element={<VehicleDetail />} />
-        <Route path="/perfil" element={<Perfil />} />
-        <Route path="/chat" element={<Chat />} />
-      </Routes>
+
+      <div className="p-6">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/mis-vehiculos" element={<GestionarVehicle />} />
+          <Route path="/vehicles/:id" element={<VehicleDetail />} />
+          <Route path="/chat" element={<Chat />} />
+        </Routes>
+      </div>
     </div>
   );
 }
