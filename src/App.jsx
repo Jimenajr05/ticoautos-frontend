@@ -7,19 +7,6 @@ import Home from './pages/Home';
 import VehicleDetail from "./pages/VehicleDetail";
 import Chat from "./pages/Chat";
 
-function Perfil() {
-  const user = JSON.parse(sessionStorage.getItem("user"));
-
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white shadow rounded-2xl p-6">
-        <h2 className="text-2xl font-bold mb-4">Información del usuario</h2>
-        <p><strong>Nombre:</strong> {user?.nombre || "No disponible"}</p>
-        <p><strong>Correo:</strong> {user?.correo || "No disponible"}</p>
-      </div>
-    </div>
-  );
-}
 
 function App() {
   return (
