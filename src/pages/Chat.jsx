@@ -52,7 +52,9 @@ function Chat() {
       });
 
       chats.sort(
-        (a, b) => new Date(a.questionDate || a.createdAt) - new Date(b.questionDate || b.createdAt)
+        (a, b) =>
+          new Date(a.questionDate || a.createdAt) -
+          new Date(b.questionDate || b.createdAt)
       );
 
       setConversation(chats);
@@ -248,10 +250,7 @@ function Chat() {
                   ? `${item.user.name || ""} ${item.user.lastName || ""}`.trim()
                   : "No disponible";
 
-                const isOwner =
-                  user?._id &&
-                  item.vehicle?.user?._id &&
-                  user._id === item.vehicle.user._id;
+                const hasPendingAnswer = !item.answer;
 
                 return (
                   <div
@@ -286,7 +285,7 @@ function Chat() {
                       <>
                         <p className="mt-2 text-amber-600">Pendiente de respuesta</p>
 
-                        {isOwner && (
+                        {hasPendingAnswer && (
                           <div className="mt-4">
                             <textarea
                               value={answerTexts[item._id] || ""}
