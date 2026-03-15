@@ -39,14 +39,6 @@ function Navbar() {
               {menuOpen && (
                 <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg bg-white text-black shadow-lg">
                   <Link
-                    to="/perfil"
-                    className="block px-4 py-3 hover:bg-slate-100"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Información del usuario
-                  </Link>
-
-                  <Link
                     to="/mis-vehiculos"
                     className="block px-4 py-3 hover:bg-slate-100"
                     onClick={() => setMenuOpen(false)}
