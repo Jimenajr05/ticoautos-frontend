@@ -1,36 +1,162 @@
-function VehicleFilters({ filters, onChange, onSubmit, onClear }) {
-    return (
-        <div className="mb-8 rounded-3xl bg-white p-6 shadow-lg ring-1 ring-slate-200">
-            <div className="mb-4">
-                <h2 className="text-2xl font-bold text-slate-900">Búsqueda y filtrado</h2>
-            </div>
+import { useState } from "react";
 
-            <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <input type="text" name="brand" placeholder="Marca" value={filters.brand} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+function VehicleFilters({ onFilter }) {
+  const [filters, setFilters] = useState({
+    brand: "",
+    model: "",
+    minYear: "",
+    maxYear: "",
+    minPrice: "",
+    maxPrice: "",
+    status: "available",
+  });
 
-                <input type="text" name="model" placeholder="Modelo" value={filters.model} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+  const handleChange = (e) => {
+    setFilters({
+      ...filters,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-                <input type="number" name="minYear" placeholder="Año mínimo" value={filters.minYear} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-                <input type="number" name="maxYear" placeholder="Año máximo" value={filters.maxYear} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+    if (
+      filters.minYear &&
+      filters.maxYear &&
+      Number(filters.minYear) > Number(filters.maxYear)
+    ) {
+      alert("El año mínimo no puede ser mayor al año máximo.");
+      return;
+    }
 
-                <input type="number" name="minPrice" placeholder="Precio mínimo" value={filters.minPrice} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+    if (
+      filters.minPrice &&
+      filters.maxPrice &&
+      Number(filters.minPrice) > Number(filters.maxPrice)
+    ) {
+      alert("El precio mínimo no puede ser mayor al precio máximo.");
+      return;
+    }
 
-                <input type="number" name="maxPrice" placeholder="Precio máximo" value={filters.maxPrice} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+    const cleanFilters = {};
 
-                <select name="status" value={filters.status} onChange={onChange} className="rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-                    <option value="">Estado</option>
-                    <option value="available">Disponible</option>
-                    <option value="sold">Vendido</option>
-                </select>
+    Object.keys(filters).forEach((key) => {
+      if (filters[key] !== "") {
+        cleanFilters[key] = filters[key];
+      }
+    });
 
-                <div className="flex gap-3 lg:col-span-1">
-                    <button type="submit" className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700">Buscar</button>
-                    <button type="button" onClick={onClear} className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-300">Limpiar</button>
-                </div>
-            </form>
-        </div>
-    );
+    onFilter(cleanFilters);
+  };
+
+  const handleClear = () => {
+    setFilters({
+      brand: "",
+      model: "",
+      minYear: "",
+      maxYear: "",
+      minPrice: "",
+      maxPrice: "",
+      status: "",
+    });
+
+    onFilter({});
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="mb-8 rounded-2xl bg-white p-6 shadow"
+    >
+      <h2 className="mb-4 text-2xl font-bold text-slate-800">
+        Buscar vehículos
+      </h2>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <input
+          type="text"
+          name="brand"
+          placeholder="Marca"
+          value={filters.brand}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="text"
+          name="model"
+          placeholder="Modelo"
+          value={filters.model}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="minYear"
+          placeholder="Año mínimo"
+          value={filters.minYear}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="maxYear"
+          placeholder="Año máximo"
+          value={filters.maxYear}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="minPrice"
+          placeholder="Precio mínimo"
+          value={filters.minPrice}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <input
+          type="number"
+          name="maxPrice"
+          placeholder="Precio máximo"
+          value={filters.maxPrice}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        />
+
+        <select
+          name="status"
+          value={filters.status}
+          onChange={handleChange}
+          className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+        >
+          <option value="available">Disponible</option>
+          <option value="sold">Vendido</option>
+        </select>
+      </div>
+
+      <div className="mt-5 flex gap-3">
+        <button
+          type="submit"
+          className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
+        >
+          Buscar
+        </button>
+
+        <button
+          type="button"
+          onClick={handleClear}
+          className="rounded-xl bg-slate-300 px-5 py-3 font-semibold text-slate-800 transition hover:bg-slate-400"
+        >
+          Limpiar
+        </button>
+      </div>
+    </form>
+  );
 }
 
 export default VehicleFilters;
