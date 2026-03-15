@@ -13,6 +13,7 @@ import {
 function Chat() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
   const vehicleId = searchParams.get("vehicleId");
   const askedById = searchParams.get("askedBy");
 
@@ -29,22 +30,36 @@ function Chat() {
 
   const loadConversationByVehicle = async () => {
     try {
+      if (!vehicleId || !askedById) {
+        console.warn("Faltan vehicleId o askedById para cargar la conversación.");
+        setConversation([]);
+        setVehicle(null);
+        return;
+      }
+
       setLoading(true);
 
       const vehicleData = await getVehicleById(vehicleId);
-      setVehicle(vehicleData.data);
+      setVehicle(vehicleData.data || null);
 
-      const conversationData = await getVehicleConversation(vehicleId);
+      const conversationData = await getVehicleConversation(vehicleId, askedById);
       let chats = conversationData.data || [];
 
-      if (askedById) {
-        chats = chats.filter((item) => item.askedBy?._id === askedById);
-      }
+      chats = chats.filter((item) => {
+        const currentAskedById =
+          item.askedBy?._id || item.askedBy || item.user?._id || item.user;
+        return currentAskedById === askedById;
+      });
 
-      chats.sort((a, b) => new Date(a.questionDate) - new Date(b.questionDate));
+      chats.sort(
+        (a, b) => new Date(a.questionDate || a.createdAt) - new Date(b.questionDate || b.createdAt)
+      );
+
       setConversation(chats);
     } catch (error) {
       console.error("Error al cargar conversación:", error);
+      setConversation([]);
+      setVehicle(null);
     } finally {
       setLoading(false);
     }
@@ -61,22 +76,25 @@ function Chat() {
 
       const sent = myQuestionsData.data || [];
       const received = myVehicleQuestionsData.data || [];
-
       const merged = [...received, ...sent];
 
       const groupedMap = new Map();
 
       merged.forEach((item) => {
-        const vehicleKey = item.vehicle?._id || item.vehicle;
-        const askedByKey = item.askedBy?._id || item.askedBy;
-        const key = `${vehicleKey}-${askedByKey}`;
+        const currentVehicleId = item.vehicle?._id || item.vehicle;
+        const currentAskedById =
+          item.askedBy?._id || item.askedBy || item.user?._id || item.user;
+
+        if (!currentVehicleId || !currentAskedById) return;
+
+        const key = `${currentVehicleId}-${currentAskedById}`;
+        const currentDate = new Date(item.questionDate || item.createdAt);
 
         if (!groupedMap.has(key)) {
           groupedMap.set(key, item);
         } else {
           const existing = groupedMap.get(key);
-          const existingDate = new Date(existing.questionDate);
-          const currentDate = new Date(item.questionDate);
+          const existingDate = new Date(existing.questionDate || existing.createdAt);
 
           if (currentDate > existingDate) {
             groupedMap.set(key, item);
@@ -85,12 +103,15 @@ function Chat() {
       });
 
       const result = Array.from(groupedMap.values()).sort(
-        (a, b) => new Date(b.questionDate) - new Date(a.questionDate)
+        (a, b) =>
+          new Date(b.questionDate || b.createdAt) -
+          new Date(a.questionDate || a.createdAt)
       );
 
       setAllChats(result);
     } catch (error) {
       console.error("Error al cargar chats:", error);
+      setAllChats([]);
     } finally {
       setLoading(false);
     }
@@ -103,7 +124,7 @@ function Chat() {
       return;
     }
 
-    if (vehicleId) {
+    if (vehicleId && askedById) {
       loadConversationByVehicle();
     } else {
       loadAllChats();
@@ -111,6 +132,11 @@ function Chat() {
   }, [vehicleId, askedById, navigate, token]);
 
   const handleSendQuestion = async () => {
+    if (!vehicleId) {
+      alert("No se encontró el vehículo para enviar la pregunta.");
+      return;
+    }
+
     if (!questionText.trim()) {
       alert("La pregunta no puede estar vacía.");
       return;
@@ -152,6 +178,11 @@ function Chat() {
   };
 
   const handleDeleteChat = async (vehicleIdToDelete, askedByIdToDelete) => {
+    if (!vehicleIdToDelete || !askedByIdToDelete) {
+      alert("No se pudo eliminar el chat porque faltan datos.");
+      return;
+    }
+
     const confirmDelete = window.confirm(
       "¿Seguro que deseas eliminar este chat y todo su historial?"
     );
@@ -161,14 +192,26 @@ function Chat() {
     try {
       await deleteChatConversation(vehicleIdToDelete, askedByIdToDelete);
 
-      if (vehicleId) {
+      if (vehicleId && askedById) {
         navigate("/chat");
       } else {
-        await loadAllChats();
+        setAllChats((prev) =>
+          prev.filter((item) => {
+            const currentVehicleId = item.vehicle?._id || item.vehicle;
+            const currentAskedById =
+              item.askedBy?._id || item.askedBy || item.user?._id || item.user;
+
+            return !(
+              currentVehicleId === vehicleIdToDelete &&
+              currentAskedById === askedByIdToDelete
+            );
+          })
+        );
       }
 
       alert("Chat eliminado correctamente.");
     } catch (error) {
+      console.error("Error al eliminar chat:", error);
       alert(error.response?.data?.message || "Error al eliminar el chat.");
     }
   };
@@ -177,7 +220,7 @@ function Chat() {
     return <div className="p-10 text-center">Cargando chat...</div>;
   }
 
-  if (!vehicleId) {
+  if (!vehicleId || !askedById) {
     return (
       <div className="min-h-screen bg-slate-100 px-6 py-10">
         <div className="mx-auto max-w-5xl rounded-3xl bg-white p-8 shadow-lg">
@@ -189,93 +232,115 @@ function Chat() {
             <p className="text-slate-600">No tienes conversaciones todavía.</p>
           ) : (
             <div className="space-y-4">
-              {allChats.map((item) => (
-                <div
-                  key={`${item.vehicle?._id}-${item.askedBy?._id}-${item._id}`}
-                  className="rounded-2xl border border-slate-200 p-5"
-                >
-                  <p className="font-semibold text-slate-900">
-                    Vehículo: {item.vehicle?.title || "Vehículo"}
-                  </p>
+              {allChats.map((item) => {
+                const currentVehicleId = item.vehicle?._id || item.vehicle;
+                const currentAskedById =
+                  item.askedBy?._id || item.askedBy || item.user?._id || item.user;
 
-                  <p className="mt-2 text-slate-700">
-                    <span className="font-semibold">Usuario:</span>{" "}
-                    {item.askedBy
-                      ? `${item.askedBy.name || ""} ${item.askedBy.lastName || ""}`.trim()
-                      : "No disponible"}
-                  </p>
+                const vehicleTitle =
+                  item.vehicle?.title ||
+                  `${item.vehicle?.brand || ""} ${item.vehicle?.model || ""}`.trim() ||
+                  "Vehículo";
 
-                  <p className="mt-1 text-sm text-slate-400">
-                    {item.questionDate
-                      ? new Date(item.questionDate).toLocaleString()
-                      : ""}
-                  </p>
+                const userName = item.askedBy
+                  ? `${item.askedBy.name || ""} ${item.askedBy.lastName || ""}`.trim()
+                  : item.user
+                  ? `${item.user.name || ""} ${item.user.lastName || ""}`.trim()
+                  : "No disponible";
 
-                  <p className="mt-2 text-slate-700">
-                    <span className="font-semibold">Último mensaje:</span>{" "}
-                    {item.question}
-                  </p>
+                const isOwner =
+                  user?._id &&
+                  item.vehicle?.user?._id &&
+                  user._id === item.vehicle.user._id;
 
-                  {item.answer ? (
-                    <p className="mt-2 text-slate-700">
-                      <span className="font-semibold">Última respuesta:</span>{" "}
-                      {item.answer}
+                return (
+                  <div
+                    key={`${currentVehicleId}-${currentAskedById}-${item._id}`}
+                    className="rounded-2xl border border-slate-200 p-5"
+                  >
+                    <p className="font-semibold text-slate-900">
+                      Vehículo: {vehicleTitle}
                     </p>
-                  ) : (
-                    <>
-                      <p className="mt-2 text-amber-600">
-                        Pendiente de respuesta
+
+                    <p className="mt-2 text-slate-700">
+                      <span className="font-semibold">Usuario:</span> {userName}
+                    </p>
+
+                    <p className="mt-1 text-sm text-slate-400">
+                      {item.questionDate || item.createdAt
+                        ? new Date(item.questionDate || item.createdAt).toLocaleString()
+                        : ""}
+                    </p>
+
+                    <p className="mt-2 text-slate-700">
+                      <span className="font-semibold">Último mensaje:</span>{" "}
+                      {item.question || "Sin mensaje"}
+                    </p>
+
+                    {item.answer ? (
+                      <p className="mt-2 text-slate-700">
+                        <span className="font-semibold">Última respuesta:</span>{" "}
+                        {item.answer}
                       </p>
+                    ) : (
+                      <>
+                        <p className="mt-2 text-amber-600">Pendiente de respuesta</p>
 
-                      {item.vehicle?.user?._id === user?._id && (
-                        <div className="mt-4">
-                          <textarea
-                            value={answerTexts[item._id] || ""}
-                            onChange={(e) =>
-                              setAnswerTexts((prev) => ({
-                                ...prev,
-                                [item._id]: e.target.value,
-                              }))
-                            }
-                            placeholder="Escribe tu respuesta..."
-                            rows="3"
-                            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
-                          />
+                        {isOwner && (
+                          <div className="mt-4">
+                            <textarea
+                              value={answerTexts[item._id] || ""}
+                              onChange={(e) =>
+                                setAnswerTexts((prev) => ({
+                                  ...prev,
+                                  [item._id]: e.target.value,
+                                }))
+                              }
+                              placeholder="Escribe tu respuesta..."
+                              rows="3"
+                              className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                            />
 
-                          <button
-                            onClick={() => handleSendAnswer(item._id, true)}
-                            className="mt-3 rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700"
-                          >
-                            Responder
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                            <button
+                              onClick={() => handleSendAnswer(item._id, true)}
+                              className="mt-3 rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700"
+                            >
+                              Responder
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
 
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <button
-                      onClick={() =>
-                        navigate(
-                          `/chat?vehicleId=${item.vehicle?._id}&askedBy=${item.askedBy?._id}`
-                        )
-                      }
-                      className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                    >
-                      Ver conversación
-                    </button>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <button
+                        onClick={() => {
+                          if (!currentVehicleId || !currentAskedById) {
+                            alert("No se puede abrir esta conversación.");
+                            return;
+                          }
 
-                    <button
-                      onClick={() =>
-                        handleDeleteChat(item.vehicle?._id, item.askedBy?._id)
-                      }
-                      className="rounded-xl bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
-                    >
-                      Eliminar chat
-                    </button>
+                          navigate(
+                            `/chat?vehicleId=${currentVehicleId}&askedBy=${currentAskedById}`
+                          );
+                        }}
+                        className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+                      >
+                        Ver conversación
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDeleteChat(currentVehicleId, currentAskedById)
+                        }
+                        className="rounded-xl bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
+                      >
+                        Eliminar chat
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -332,7 +397,8 @@ function Chat() {
 
             {!canAsk && (
               <p className="mt-2 text-sm text-amber-600">
-                Debes esperar la respuesta del vendedor antes de enviar otro mensaje.
+                Debes esperar la respuesta del vendedor antes de enviar otro
+                mensaje.
               </p>
             )}
 
@@ -351,7 +417,9 @@ function Chat() {
         )}
 
         {conversation.length === 0 ? (
-          <p className="text-slate-600">Aún no hay mensajes para este vehículo.</p>
+          <p className="text-slate-600">
+            Aún no hay mensajes para este vehículo.
+          </p>
         ) : (
           <div className="space-y-6">
             {conversation.map((item) => (
@@ -364,7 +432,7 @@ function Chat() {
                     {item.askedBy?.name} {item.askedBy?.lastName}
                   </p>
                   <p className="text-sm text-slate-500">
-                    {new Date(item.questionDate).toLocaleString()}
+                    {new Date(item.questionDate || item.createdAt).toLocaleString()}
                   </p>
                 </div>
 
@@ -381,7 +449,9 @@ function Chat() {
                       {item.answer}
                     </div>
                     <p className="mt-2 text-sm text-slate-500">
-                      {new Date(item.answerDate).toLocaleString()}
+                      {item.answerDate
+                        ? new Date(item.answerDate).toLocaleString()
+                        : ""}
                     </p>
                   </div>
                 ) : isOwner && canAnswer && item._id === lastMessage?._id ? (
