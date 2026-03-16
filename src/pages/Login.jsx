@@ -27,7 +27,7 @@ function Login() {
             sessionStorage.setItem("user", JSON.stringify(data.user));
 
             alert("¡Login correcto!");
-            navigate("/");
+            navigate("/Home");
         } catch (error) {
             alert(error.response?.data?.message || "Error al iniciar sesión");
         }
