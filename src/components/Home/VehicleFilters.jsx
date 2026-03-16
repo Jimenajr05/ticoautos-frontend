@@ -8,7 +8,7 @@ function VehicleFilters({ onFilter }) {
     maxYear: "",
     minPrice: "",
     maxPrice: "",
-    status: "available",
+    status: "",
   });
 
   const handleChange = (e) => {
@@ -134,6 +134,7 @@ function VehicleFilters({ onFilter }) {
           onChange={handleChange}
           className="rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
         >
+          <option value="" disabled hidden>Estado del vehículo</option>
           <option value="available">Disponible</option>
           <option value="sold">Vendido</option>
         </select>
