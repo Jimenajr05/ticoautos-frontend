@@ -43,17 +43,28 @@ function VehicleDetail() {
     }
   };
 
-  const handleInterestClick = () => {
-    const token = sessionStorage.getItem("token");
+ const handleInterestClick = () => {
+  const token = sessionStorage.getItem("token");
+  const userData = sessionStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
 
-    if (!token) {
-      alert("Debes iniciar sesión para contactar al vendedor.");
-      navigate("/login");
-      return;
-    }
+  if (!token || !user) {
+    alert("Debes iniciar sesión para contactar al vendedor.");
+    navigate("/login");
+    return;
+  }
 
-    navigate(`/chat?vehicleId=${vehicle._id}`);
-  };
+  const ownerId =
+    vehicle.user?._id || vehicle.usuario?._id || vehicle.user || vehicle.usuario;
+
+  // Evita que el dueño se escriba a sí mismo
+  if (user._id === ownerId) {
+    alert("No puedes iniciar un chat con tu propio vehículo.");
+    return;
+  }
+
+  navigate(`/chat?vehicleId=${vehicle._id}&askedBy=${user._id}`);
+};
 
   if (loading) {
     return (
