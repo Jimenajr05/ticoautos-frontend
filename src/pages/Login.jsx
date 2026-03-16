@@ -1,15 +1,25 @@
+// Importa el hook useState para manejar el estado del formulario
 import { useState } from "react";
+
+// Importa el servicio de login para comunicarse con el backend
 import { login } from "../services/authService";
+
+// Importa Link y useNavigate para navegación entre páginas
 import { Link, useNavigate } from "react-router-dom";
 
+// Componente de inicio de sesión
 function Login() {
+
+    // Hook para redireccionar después del login
     const navigate = useNavigate();
 
+    // Estado del formulario de login
     const [form, setForm] = useState({
         email: "",
         password: ""
     });
 
+    // Maneja los cambios en los inputs del formulario
     const handleChange = (e) => {
         setForm({
             ...form,
@@ -17,16 +27,24 @@ function Login() {
         });
     };
 
+    // Maneja el envío del formulario
     const handleSubmit = async (e) => {
-        e.preventDefault();
+
+        e.preventDefault();// Evita que la página se recargue
 
         try {
+            // Llama al servicio de login enviando los datos del formulario
             const data = await login(form);
 
+            // Guarda el token en sessionStorage
             sessionStorage.setItem("token", data.token);
+
+            // Guarda los datos del usuario
             sessionStorage.setItem("user", JSON.stringify(data.user));
 
             alert("¡Login correcto!");
+
+            // Redirige al Home
             navigate("/Home");
         } catch (error) {
             alert(error.response?.data?.message || "Error al iniciar sesión");

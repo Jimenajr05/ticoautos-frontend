@@ -1,6 +1,10 @@
+// Importa el hook useState para manejar el estado de los filtros
 import { useState } from "react";
 
+// Componente para filtrar vehículos
 function VehicleFilters({ onFilter }) {
+
+  // Estado que guarda los valores de los filtros
   const [filters, setFilters] = useState({
     brand: "",
     model: "",
@@ -11,6 +15,7 @@ function VehicleFilters({ onFilter }) {
     status: "",
   });
 
+  // Maneja los cambios en los campos del formulario
   const handleChange = (e) => {
     setFilters({
       ...filters,
@@ -18,9 +23,11 @@ function VehicleFilters({ onFilter }) {
     });
   };
 
+  // Maneja el envío del formulario de filtros
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Valida que el año mínimo no sea mayor que el máximo
     if (
       filters.minYear &&
       filters.maxYear &&
@@ -30,6 +37,7 @@ function VehicleFilters({ onFilter }) {
       return;
     }
 
+    // Valida que el precio mínimo no sea mayor que el máximo
     if (
       filters.minPrice &&
       filters.maxPrice &&
@@ -39,6 +47,7 @@ function VehicleFilters({ onFilter }) {
       return;
     }
 
+    // Crea un objeto solo con los filtros que sí tienen valor
     const cleanFilters = {};
 
     Object.keys(filters).forEach((key) => {
@@ -47,9 +56,11 @@ function VehicleFilters({ onFilter }) {
       }
     });
 
+    // Envía los filtros al componente padre
     onFilter(cleanFilters);
   };
 
+  // Limpia todos los filtros
   const handleClear = () => {
     setFilters({
       brand: "",
@@ -61,6 +72,7 @@ function VehicleFilters({ onFilter }) {
       status: "",
     });
 
+    // Vuelve a cargar sin filtros
     onFilter({});
   };
 

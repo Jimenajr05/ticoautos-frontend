@@ -1,5 +1,7 @@
-import {Link} from "react-router-dom";
+// Importa Link para navegar entre páginas sin recargar
+import { Link } from "react-router-dom";
 
+// Componente de sección principal (Hero) de la página pública
 function HeroSection() {
     return (
         <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-900 text-white">

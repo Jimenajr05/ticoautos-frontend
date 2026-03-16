@@ -1,4 +1,7 @@
+// Importa hooks de React
 import { useEffect, useState } from "react";
+
+// Importa funciones del servicio de vehículos para interactuar con el backend
 import {
   createVehicle,
   deleteVehicle,
@@ -6,13 +9,20 @@ import {
   updateVehicle,
   getMyVehicles,
 } from "../services/vehicleService";
+// Importa hook de navegación de React Router
 import { useNavigate } from "react-router-dom";
+
+// Importa componentes reutilizables
 import VehicleForm from "../components/Vehicles/VehicleForm";
 import MyVehicleCard from "../components/Vehicles/MyVehicleCard";
 
+// Componente principal para gestionar vehículos del usuario
 function GestionarVehicle() {
+
+  // Hook para navegar entre páginas
   const navigate = useNavigate();
 
+  // Estado inicial del formulario
   const initialForm = {
     title: "",
     brand: "",
@@ -23,15 +33,22 @@ function GestionarVehicle() {
     vehicleImage: [],
   };
 
+  // Estado del formulario
   const [form, setForm] = useState(initialForm);
+
+  // Lista de vehículos del usuario
   const [vehicles, setVehicles] = useState([]);
+
+  // Guarda el id del vehículo que se está editando
   const [editingVehicleId, setEditingVehicleId] = useState(null);
 
+  // Resetea el formulario
   const resetForm = () => {
     setForm(initialForm);
     setEditingVehicleId(null);
   };
 
+  // Carga los vehículos del usuario desde el backend
   const loadVehicles = async () => {
     try {
       const data = await getMyVehicles();
@@ -41,27 +58,34 @@ function GestionarVehicle() {
     }
   };
 
+  // Se ejecuta cuando se carga el componente
   useEffect(() => {
+    // Obtiene el token de sesión
     const token = sessionStorage.getItem("token");
 
+    // Si no hay token, redirige al login
     if (!token) {
       alert("Debes iniciar sesión para acceder a esta página.");
       navigate("/login");
       return;
     }
 
+    // Carga los vehículos
     loadVehicles();
   }, [navigate]);
 
+  // Maneja cambios en los inputs del formulario
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
+    // Si el campo es imagen, guarda los archivos
     if (name === "vehicleImage") {
       setForm({
         ...form,
         vehicleImage: files,
       });
     } else {
+      // Para los demás campos guarda el valor normal
       setForm({
         ...form,
         [name]: value,
@@ -69,6 +93,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Valida los datos del formulario antes de enviarlos
   const validateForm = () => {
     if (!form.title.trim()) {
       alert("El título del vehículo es obligatorio.");
@@ -90,6 +115,7 @@ function GestionarVehicle() {
       return false;
     }
 
+    // Verifica que el año sea válido
     if (
       Number(form.year) < 1900 ||
       Number(form.year) > new Date().getFullYear()
@@ -103,6 +129,7 @@ function GestionarVehicle() {
       return false;
     }
 
+    // Verifica que el precio sea mayor que 0
     if (Number(form.price) <= 0) {
       alert("El precio debe ser mayor a 0.");
       return false;
@@ -113,6 +140,7 @@ function GestionarVehicle() {
       return false;
     }
 
+    // Si se está creando un vehículo nuevo exige imagen
     if (!editingVehicleId && (!form.vehicleImage || form.vehicleImage.length === 0)) {
       alert("Debes subir al menos una foto del vehículo.");
       return false;
@@ -121,8 +149,11 @@ function GestionarVehicle() {
     return true;
   };
 
+  // Construye el FormData para enviar datos y archivos al backend
   const buildFormData = () => {
+
     const formData = new FormData();
+
     formData.append("title", form.title);
     formData.append("brand", form.brand);
     formData.append("model", form.model);
@@ -130,6 +161,7 @@ function GestionarVehicle() {
     formData.append("price", form.price);
     formData.append("description", form.description);
 
+    // Agrega las imágenes al FormData
     if (form.vehicleImage && form.vehicleImage.length > 0) {
       for (let i = 0; i < form.vehicleImage.length; i++) {
         formData.append("vehicleImage", form.vehicleImage[i]);
@@ -139,6 +171,7 @@ function GestionarVehicle() {
     return formData;
   };
 
+  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -149,14 +182,17 @@ function GestionarVehicle() {
     try {
       const formData = buildFormData();
 
+      // Si se está editando un vehículo
       if (editingVehicleId) {
         await updateVehicle(editingVehicleId, formData);
         alert("Vehículo actualizado correctamente.");
       } else {
+        // Si es un vehículo nuevo
         await createVehicle(formData);
         alert("Vehículo creado correctamente.");
       }
 
+      // Limpia el formulario y recarga la lista
       resetForm();
       await loadVehicles();
     } catch (error) {
@@ -170,6 +206,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Carga los datos de un vehículo en el formulario para editarlo
   const handleEdit = (vehicle) => {
     setForm({
       title: vehicle.title || "",
@@ -182,9 +219,12 @@ function GestionarVehicle() {
     });
 
     setEditingVehicleId(vehicle._id);
+
+    // Hace scroll al inicio de la página
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Elimina un vehículo
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "¿Seguro que deseas eliminar este vehículo?"
@@ -202,6 +242,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Marca un vehículo como vendido
   const handleMarkAsSold = async (id) => {
     try {
       await markVehicleAsSold(id);
@@ -227,6 +268,7 @@ function GestionarVehicle() {
           </p>
         </div>
 
+        {/* Formulario de vehículo */}
         <VehicleForm
           form={form}
           editingVehicleId={editingVehicleId}
@@ -245,6 +287,7 @@ function GestionarVehicle() {
             </p>
           </div>
 
+          {/* Contador de vehículos */}
           <span className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow ring-1 ring-slate-200">
             {vehicles.length} {vehicles.length === 1 ? "vehículo" : "vehículos"}
           </span>
@@ -255,6 +298,8 @@ function GestionarVehicle() {
             No tienes vehículos registrados todavía.
           </div>
         ) : (
+
+          // Lista de vehículos
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {vehicles.map((vehicle) => (
               <MyVehicleCard

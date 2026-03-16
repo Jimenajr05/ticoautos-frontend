@@ -1,17 +1,35 @@
+// Importa el hook useState para manejar el estado del menú
 import { useState } from "react";
+
+// Importa herramientas de navegación de React Router
 import { Link, useNavigate } from "react-router-dom";
 
+// Componente de la barra de navegación
 function Navbar() {
+
+  // Hook para redireccionar entre páginas
   const navigate = useNavigate();
+
+  // Estado para controlar si el menú desplegable está abierto o cerrado
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Obtiene los datos del usuario guardados en sessionStorage
   const userData = sessionStorage.getItem("user");
+
+  // Convierte los datos del usuario de string a objeto
   const user = userData ? JSON.parse(userData) : null;
 
+  // Función para cerrar sesión
   const handleLogout = () => {
+
+    // Elimina el token y los datos del usuario de la sesión
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
+
+    // Cierra el menú desplegable
     setMenuOpen(false);
+
+    // Redirige al login
     navigate("/login");
   };
 

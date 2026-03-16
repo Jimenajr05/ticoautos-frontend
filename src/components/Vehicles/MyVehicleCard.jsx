@@ -1,3 +1,4 @@
+// Componente para mostrar una tarjeta de un vehículo del usuario
 function MyVehicleCard({ vehicle, onEdit, onDelete, onMarkAsSold }) {
   return (
     <div className="overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-2xl">

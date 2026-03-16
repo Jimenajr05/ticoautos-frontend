@@ -1,4 +1,7 @@
+// Componente para manejar la paginación de la lista de vehículos
 function Pagination({ pagination, onPageChange }) {
+
+    // Si solo hay una página, no se muestra la paginación
     if (pagination.totalPages <= 1) return null;
 
     return (

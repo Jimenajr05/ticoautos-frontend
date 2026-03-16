@@ -1,5 +1,7 @@
+// Importa el componente Link para navegar entre páginas
 import { Link } from "react-router-dom";
 
+// Componente que muestra una tarjeta de un vehículo en la lista pública
 function VehicleCard({ vehicle }) {
     return (
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-2xl">

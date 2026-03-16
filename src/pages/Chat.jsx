@@ -1,6 +1,13 @@
+// Importa hooks de React
 import { useEffect, useState } from "react";
+
+// Importa herramientas de React Router
 import { useSearchParams, useNavigate } from "react-router-dom";
+
+// Importa el servicio para obtener información de un vehículo
 import { getVehicleById } from "../services/vehicleService";
+
+// Importa servicios relacionados con preguntas y conversaciones
 import {
   getVehicleConversation,
   createQuestion,
@@ -10,26 +17,50 @@ import {
   deleteChatConversation,
 } from "../services/questionService";
 
+// Componente principal del chat
 function Chat() {
+
+  // Obtiene los parámetros de la URL
   const [searchParams] = useSearchParams();
+
+  // Hook para navegar entre páginas
   const navigate = useNavigate();
 
+  // Obtiene el id del vehículo desde la URL
   const vehicleId = searchParams.get("vehicleId");
+
+  // Obtiene el id del usuario que inició la conversación
   const askedById = searchParams.get("askedBy");
 
+  // Estado para guardar el vehículo actual
   const [vehicle, setVehicle] = useState(null);
+
+  // Estado para guardar la conversación actual
   const [conversation, setConversation] = useState([]);
+
+  // Estado para guardar todos los chats del usuario
   const [allChats, setAllChats] = useState([]);
+
+  // Estado para la nueva pregunta
   const [questionText, setQuestionText] = useState("");
+
+  // Estado para guardar respuestas escritas, usando el id de la pregunta como clave
   const [answerTexts, setAnswerTexts] = useState({});
+
+  // Estado de carga
   const [loading, setLoading] = useState(true);
 
+  // Obtiene los datos del usuario guardados en sesión
   const userData = sessionStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
+
+  // Obtiene el token guardado en sesión
   const token = sessionStorage.getItem("token");
 
+  // Carga la conversación de un vehículo específico
   const loadConversationByVehicle = async () => {
     try {
+      // Verifica que existan los parámetros necesarios
       if (!vehicleId || !askedById) {
         console.warn("Faltan vehicleId o askedById para cargar la conversación.");
         setConversation([]);
@@ -39,20 +70,24 @@ function Chat() {
 
       setLoading(true);
 
+      // Obtiene los datos del vehículo
       const vehicleData = await getVehicleById(vehicleId);
       const currentVehicle = vehicleData.data || null;
       setVehicle(currentVehicle);
 
       try {
+        // Obtiene la conversación del vehículo con ese usuario
         const conversationData = await getVehicleConversation(vehicleId, askedById);
         let chats = conversationData.data || [];
 
+        // Filtra los mensajes para que solo sean de ese usuario
         chats = chats.filter((item) => {
           const currentAskedById =
             item.askedBy?._id || item.askedBy || item.user?._id || item.user;
           return currentAskedById === askedById;
         });
 
+        // Ordena la conversación de más antigua a más reciente
         chats.sort(
           (a, b) =>
             new Date(a.questionDate || a.createdAt) -
@@ -76,10 +111,12 @@ function Chat() {
     }
   };
 
+  // Carga todos los chats del usuario
   const loadAllChats = async () => {
     try {
       setLoading(true);
 
+      // Obtiene las preguntas hechas por el usuario y las preguntas recibidas en sus vehículos
       const [myQuestionsData, myVehicleQuestionsData] = await Promise.all([
         getMyQuestions(),
         getMyVehicleQuestions(),
@@ -89,6 +126,7 @@ function Chat() {
       const received = myVehicleQuestionsData.data || [];
       const merged = [...received, ...sent];
 
+      // Mapa para agrupar conversaciones por vehículo + usuario
       const groupedMap = new Map();
 
       merged.forEach((item) => {
@@ -101,9 +139,11 @@ function Chat() {
         const key = `${currentVehicleId}-${currentAskedById}`;
         const currentDate = new Date(item.questionDate || item.createdAt);
 
+        // Si no existe la conversación, la agrega
         if (!groupedMap.has(key)) {
           groupedMap.set(key, item);
         } else {
+          // Si ya existe, deja el mensaje más reciente
           const existing = groupedMap.get(key);
           const existingDate = new Date(existing.questionDate || existing.createdAt);
 
@@ -113,6 +153,7 @@ function Chat() {
         }
       });
 
+      // Convierte el mapa en arreglo y lo ordena de más reciente a más antiguo
       const result = Array.from(groupedMap.values()).sort(
         (a, b) =>
           new Date(b.questionDate || b.createdAt) -
@@ -128,56 +169,74 @@ function Chat() {
     }
   };
 
+
+  // Se ejecuta al cargar el componente o cuando cambian parámetros importantes
   useEffect(() => {
+
+    // Si no hay token, redirige al login
     if (!token) {
       alert("Debes iniciar sesión para ver tus chats.");
       navigate("/login");
       return;
     }
 
+    // Si hay vehicleId y askedById, carga una conversación específica
     if (vehicleId && askedById) {
       loadConversationByVehicle();
     } else {
+      // Si no, carga la lista general de chats
       loadAllChats();
     }
   }, [vehicleId, askedById, navigate, token]);
 
+  // Envía una nueva pregunta
   const handleSendQuestion = async () => {
+
+    // Verifica que exista el vehículo
     if (!vehicleId) {
       alert("No se encontró el vehículo para enviar la pregunta.");
       return;
     }
 
+    // Verifica que el mensaje no esté vacío
     if (!questionText.trim()) {
       alert("La pregunta no puede estar vacía.");
       return;
     }
 
     try {
+      // Crea la pregunta
       await createQuestion(vehicleId, questionText);
+      // Limpia el campo
       setQuestionText("");
+      // Recarga la conversación
       await loadConversationByVehicle();
     } catch (error) {
       alert(error.response?.data?.message || "Error al enviar pregunta.");
     }
   };
 
+  // Envía una respuesta a una pregunta
   const handleSendAnswer = async (questionId, fromList = false) => {
     const answer = answerTexts[questionId];
 
+    // Verifica que la respuesta no esté vacía
     if (!answer || !answer.trim()) {
       alert("La respuesta no puede estar vacía.");
       return;
     }
 
     try {
+      // Envía la respuesta al backend
       await answerQuestion(questionId, answer);
 
+      // Limpia el campo de texto de esa respuesta
       setAnswerTexts((prev) => ({
         ...prev,
         [questionId]: "",
       }));
 
+      // Recarga según el contexto
       if (fromList) {
         await loadAllChats();
       } else {
@@ -188,12 +247,16 @@ function Chat() {
     }
   };
 
+  // Elimina una conversación completa
   const handleDeleteChat = async (vehicleIdToDelete, askedByIdToDelete) => {
+
+    // Verifica que existan los datos necesarios
     if (!vehicleIdToDelete || !askedByIdToDelete) {
       alert("No se pudo eliminar el chat porque faltan datos.");
       return;
     }
 
+    // Confirmación antes de eliminar
     const confirmDelete = window.confirm(
       "¿Seguro que deseas eliminar este chat y todo su historial?"
     );
@@ -201,11 +264,15 @@ function Chat() {
     if (!confirmDelete) return;
 
     try {
+      // Elimina la conversación
       await deleteChatConversation(vehicleIdToDelete, askedByIdToDelete);
 
+      // Si estaba dentro de una conversación específica, vuelve a la lista
       if (vehicleId && askedById) {
         navigate("/chat");
       } else {
+
+        // Si está en la lista, la actualiza localmente
         setAllChats((prev) =>
           prev.filter((item) => {
             const currentVehicleId = item.vehicle?._id || item.vehicle;
@@ -227,10 +294,12 @@ function Chat() {
     }
   };
 
+  // Vista mientras carga
   if (loading) {
     return <div className="p-10 text-center">Cargando chat...</div>;
   }
 
+  // Vista de lista general de chats
   if (!vehicleId || !askedById) {
     return (
       <div className="min-h-screen bg-slate-100 px-6 py-10">
@@ -248,17 +317,20 @@ function Chat() {
                 const currentAskedById =
                   item.askedBy?._id || item.askedBy || item.user?._id || item.user;
 
+                // Obtiene el nombre del vehículo
                 const vehicleTitle =
                   item.vehicle?.title ||
                   `${item.vehicle?.brand || ""} ${item.vehicle?.model || ""}`.trim() ||
                   "Vehículo";
 
+                // Obtiene el nombre del usuario
                 const userName = item.askedBy
                   ? `${item.askedBy.name || ""} ${item.askedBy.lastName || ""}`.trim()
                   : item.user
                   ? `${item.user.name || ""} ${item.user.lastName || ""}`.trim()
                   : "No disponible";
 
+                // Indica si hay respuesta pendiente
                 const hasPendingAnswer = !item.answer;
 
                 return (
@@ -356,6 +428,7 @@ function Chat() {
     );
   }
 
+  // Si no se encontró el vehículo relacionado
   if (!vehicle) {
     return (
       <div className="p-10 text-center text-slate-600">
@@ -364,13 +437,20 @@ function Chat() {
     );
   }
 
+  // Obtiene el id del propietario del vehículo
   const ownerId = vehicle.user?._id || vehicle.usuario?._id || vehicle.user || vehicle.usuario;
+
+  // Verifica si el usuario actual es el dueño
   const isOwner = user?._id === ownerId;
 
+  // Obtiene el último mensaje de la conversación
   const lastMessage =
     conversation.length > 0 ? conversation[conversation.length - 1] : null;
 
+  // El comprador puede preguntar solo si no es dueño y la última pregunta ya fue respondida
   const canAsk = !isOwner && (!lastMessage || !!lastMessage.answer);
+
+  // El dueño puede responder si el último mensaje no tiene respuesta
   const canAnswer = isOwner && lastMessage && !lastMessage.answer;
 
   return (
@@ -399,6 +479,7 @@ function Chat() {
           </button>
         </div>
 
+         {/* Caja para enviar pregunta si el usuario no es dueño */}
         {!isOwner && (
           <div className="mb-8">
             <textarea

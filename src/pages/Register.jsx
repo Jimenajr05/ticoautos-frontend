@@ -1,10 +1,19 @@
-import {useState} from "react";
-import {register} from "../services/authService";
-import {Link, useNavigate} from "react-router-dom";
+// Importa el hook useState para manejar el estado del formulario
+import { useState } from "react";
 
+// Importa el servicio de registro para enviar los datos al backend
+import { register } from "../services/authService";
+
+// Importa Link y useNavigate para navegación entre páginas
+import { Link, useNavigate } from "react-router-dom";
+
+// Componente de registro de usuario
 function Register() {
+
+    // Hook para redireccionar después del registro
     const navigate = useNavigate();
 
+    // Estado del formulario
     const [form, setForm] = useState({
         name: "",
         lastName: "",
@@ -15,14 +24,18 @@ function Register() {
         profileImage: null
     });
 
+    // Maneja los cambios en los inputs del formulario
     const handleChange = (e) => {
         const { name, value, files } = e.target;
+
+        // Si el campo es la imagen de perfil, guarda el archivo
         if (name === "profileImage") {
             setForm({
                 ...form,
                 profileImage: files[0]
             });
         } else {
+            // Para los demás campos guarda el valor escrito
             setForm({
                 ...form,
                 [name]: value
@@ -30,10 +43,14 @@ function Register() {
         }
     };
 
+    // Maneja el envío del formulario
     const handleSubmit = async (e) => {
+        // Evita recargar la página
         e.preventDefault();
 
         try {
+
+            // Crea un FormData para enviar texto e imagen
             const formData = new FormData();
 
             formData.append("name", form.name);
@@ -43,19 +60,28 @@ function Register() {
             formData.append("email", form.email);
             formData.append("password", form.password);
 
+            // Si el usuario seleccionó una imagen, la agrega
             if (form.profileImage) {
                 formData.append("profileImage", form.profileImage);
             }
 
+            // Envía los datos al servicio de registro
             const data = await register(formData);
 
+            // Guarda el token en sessionStorage
             sessionStorage.setItem('token', data.token);
+
+            // Guarda los datos del usuario
             sessionStorage.setItem('user', JSON.stringify(data.user));
 
             alert('¡Registro correcto!');
+
+            // Redirige al login
             navigate('/login');
             console.log(data);
         } catch (error) {
+
+            // Muestra el mensaje de error del backend o uno genérico
             alert(error.response?.data?.message || 'Error al registrar');
         }
     };

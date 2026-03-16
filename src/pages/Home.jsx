@@ -1,58 +1,90 @@
+// Importa hooks de React
 import { useEffect, useState } from "react";
+
+// Importa navegación de React Router
 import { useNavigate } from "react-router-dom";
+
+// Importa el servicio para obtener vehículos desde el backend
 import { getVehicles } from "../services/vehicleService";
+
+// Importa componentes de la página principal
 import VehicleFilters from "../components/Home/VehicleFilters";
 import VehicleCard from "../components/Home/VehicleCard";
 import Pagination from "../components/Home/Pagination";
 
+// Componente principal de la página Home
 function Home() {
+
+  // Hook para redireccionar entre páginas
   const navigate = useNavigate();
 
+  // Estado para guardar los vehículos obtenidos del backend
   const [vehicles, setVehicles] = useState([]);
+
+  // Estado para controlar la carga de datos
   const [loading, setLoading] = useState(true);
 
+  // Estado para manejar la paginación
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalVehicles: 0
   });
 
+  // Estado para guardar los filtros actuales
   const [currentFilters, setCurrentFilters] = useState({});
 
+  // Función para cargar los vehículos con filtros y paginación
   const loadVehicles = async (filters = currentFilters, page = 1) => {
     try {
+
+      // Activa el estado de carga
       setLoading(true);
 
+      // Combina filtros con paginación
       const finalFilters = { ...filters, page, limit: 6 };
 
+      // Llama al servicio del backend
       const data = await getVehicles(finalFilters);
 
+      // Guarda los vehículos obtenidos
       setVehicles(data.data || []);
 
+      // Actualiza la información de paginación
       setPagination({
         currentPage: data.currentPage || 1,
         totalPages: data.totalPages || 1,
         totalVehicles: data.totalVehicles || 0
       });
 
+      // Guarda los filtros actuales
       setCurrentFilters(filters);
 
     } catch (error) {
       console.error("Error al cargar vehículos:", error);
+
+      // Si ocurre un error limpia la lista
       setVehicles([]);
     } finally {
+
+      // Finaliza el estado de carga
       setLoading(false);
     }
   };
 
+  // Se ejecuta cuando se carga el componente
   useEffect(() => {
+
+    // Obtiene el token de sesión
     const token = sessionStorage.getItem("token");
 
+    // Si no hay sesión redirige al login
     if (!token) {
       navigate("/login");
       return;
     }
 
+    // Carga los vehículos al iniciar la página
     loadVehicles({}, 1);
 
   }, [navigate]);

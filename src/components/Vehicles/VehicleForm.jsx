@@ -1,3 +1,4 @@
+// Componente formulario para crear o editar vehículos
 function VehicleForm({
   form,
   editingVehicleId,
