@@ -23,6 +23,7 @@ Este proyecto fue desarrollado con **React**, **Vite**, **React Router**, **Axio
 ## Instalación de dependencias
 Durante el desarrollo del proyecto se instalaron las siguientes dependencias:
 
+
 - npm create vite@latest .
 - npm install axios
 - npm install react-router-dom
