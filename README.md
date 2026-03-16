@@ -18,13 +18,17 @@ Este proyecto fue desarrollado con **React**, **Vite**, **React Router**, **Axio
 - HTML5
 - CSS3
 
+---
+
 ## Instalación de dependencias
 Durante el desarrollo del proyecto se instalaron las siguientes dependencias:
 
-npm create vite@latest .
-npm install axios
-npm install react-router-dom
-npm install -D tailwindcss @tailwindcss/vite
+- npm create vite@latest .
+- npm install axios
+- npm install react-router-dom
+- npm install -D tailwindcss @tailwindcss/vite
+
+---
 
 ## Estructura del proyecto
 
@@ -76,39 +80,59 @@ ticoautos-frontend
 └── README.md
 ```
 
+---
+
 # Instalación y ejecución
 
 1. Clonar el repositorio
 
+```
 git clone https://github.com/Jimenajr05/ticoautos-frontend
+```
 
 2. Entrar a la carpeta del proyecto
 
+```
 cd ticoautos-frontend
+```
 
 3. Instalar dependencias
 
+```
 npm install
+```
 
 4. Ejecutar el proyecto en desarrollo
 
+```
 npm run dev
+```
 
 El proyecto se ejecutará normalmente en:
 
+```
 http://localhost:5173
+```
+
+---
 
 # Conexión con el backend
 
 Este frontend consume el backend mediante Axios usando rutas como:
 
+```
 http://localhost:3000/api/auth
 http://localhost:3000/api/vehicles
 http://localhost:3000/api/questions
+```
 
 Por lo tanto, el backend debe estar ejecutándose en:
 
+```
 http://localhost:3000
+```
+
+---
 
 # Funcionalidades principales
 
@@ -153,6 +177,8 @@ http://localhost:3000
 - Restricción para evitar que el dueño se escriba a sí mismo
 - Restricción para que el comprador espere respuesta antes de enviar otra pregunta
 
+---
+
 # Componentes principales
 - Navbar.jsx
 - HeroSection.jsx
@@ -161,6 +187,8 @@ http://localhost:3000
 - Pagination.jsx
 - VehicleForm.jsx
 - MyVehicleCard.jsx
+
+---
 
 # Páginas principales
 - PublicHome.jsx
@@ -171,11 +199,15 @@ http://localhost:3000
 - VehicleDetail.jsx
 - Chat.jsx
 
+---
+
 # Servicios
 
 - authService.js
 - vehicleService.js
 - questionService.js
+
+---
 
 # Manejo de sesión
 
@@ -188,12 +220,18 @@ Esto permite mantener la sesión activa mientras el navegador permanezca abierto
 
 Ejemplo:
 
-- sessionStorage.setItem("token", data.token);
-- sessionStorage.setItem("user", JSON.stringify(data.user));
+```
+sessionStorage.setItem("token", data.token);
+sessionStorage.setItem("user", JSON.stringify(data.user));
+```
+
+---
 
 # Diseño de interfaz
 
 El proyecto utiliza Tailwind CSS para construir la interfaz
+
+--- 
 
 # Dependencias principales
 
@@ -212,6 +250,8 @@ El proyecto utiliza Tailwind CSS para construir la interfaz
 - @tailwindcss/vite
 - eslint
 
+---
+
 # Requisitos para funcionar correctamente
 
 - Node.js instalado
@@ -220,7 +260,9 @@ El proyecto utiliza Tailwind CSS para construir la interfaz
 - MongoDB funcionando desde el backend
 - Navegador web 
 
+---
+
 # Autoras
 
-María Paz Ugalde Araya
-María Jimena Jara Rojas
+- María Paz Ugalde Araya
+- María Jimena Jara Rojas
