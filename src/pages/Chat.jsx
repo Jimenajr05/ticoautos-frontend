@@ -40,24 +40,33 @@ function Chat() {
       setLoading(true);
 
       const vehicleData = await getVehicleById(vehicleId);
-      setVehicle(vehicleData.data || null);
+      const currentVehicle = vehicleData.data || null;
+      setVehicle(currentVehicle);
 
-      const conversationData = await getVehicleConversation(vehicleId, askedById);
-      let chats = conversationData.data || [];
+      try {
+        const conversationData = await getVehicleConversation(vehicleId, askedById);
+        let chats = conversationData.data || [];
 
-      chats = chats.filter((item) => {
-        const currentAskedById =
-          item.askedBy?._id || item.askedBy || item.user?._id || item.user;
-        return currentAskedById === askedById;
-      });
+        chats = chats.filter((item) => {
+          const currentAskedById =
+            item.askedBy?._id || item.askedBy || item.user?._id || item.user;
+          return currentAskedById === askedById;
+        });
 
-      chats.sort(
-        (a, b) =>
-          new Date(a.questionDate || a.createdAt) -
-          new Date(b.questionDate || b.createdAt)
-      );
+        chats.sort(
+          (a, b) =>
+            new Date(a.questionDate || a.createdAt) -
+            new Date(b.questionDate || b.createdAt)
+        );
 
-      setConversation(chats);
+        setConversation(chats);
+      } catch (conversationError) {
+        console.warn(
+          "No se encontró conversación previa o hubo error al cargarla:",
+          conversationError
+        );
+        setConversation([]);
+      }
     } catch (error) {
       console.error("Error al cargar conversación:", error);
       setConversation([]);
@@ -355,7 +364,9 @@ function Chat() {
     );
   }
 
-  const isOwner = user?._id === vehicle.user?._id;
+  const ownerId = vehicle.user?._id || vehicle.usuario?._id || vehicle.user || vehicle.usuario;
+  const isOwner = user?._id === ownerId;
+
   const lastMessage =
     conversation.length > 0 ? conversation[conversation.length - 1] : null;
 
@@ -371,7 +382,12 @@ function Chat() {
               Chat con usuarios
             </h1>
             <p className="text-slate-600">
-              Vehículo: <span className="font-semibold">{vehicle.title}</span>
+              Vehículo:{" "}
+              <span className="font-semibold">
+                {vehicle.title ||
+                  `${vehicle.brand || ""} ${vehicle.model || ""}`.trim() ||
+                  "Vehículo"}
+              </span>
             </p>
           </div>
 
@@ -417,7 +433,8 @@ function Chat() {
 
         {conversation.length === 0 ? (
           <p className="text-slate-600">
-            Aún no hay mensajes para este vehículo.
+            Aún no hay mensajes para este vehículo. Escribe el primero para
+            iniciar la conversación.
           </p>
         ) : (
           <div className="space-y-6">
