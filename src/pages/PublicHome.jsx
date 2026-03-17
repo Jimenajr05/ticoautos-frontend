@@ -1,27 +1,22 @@
 // Importa hooks de React
 import { useEffect, useState } from "react";
 
-// Importa navegación de React Router
-import { useNavigate } from "react-router-dom";
-
 // Importa el servicio para obtener vehículos desde el backend
 import { getVehicles } from "../services/vehicleService";
 
-// Importa componentes de la página principal
+// Importa componentes de la página pública
+import HeroSection from "../components/Home/HeroSection";
 import VehicleFilters from "../components/Home/VehicleFilters";
 import VehicleCard from "../components/Home/VehicleCard";
 import Pagination from "../components/Home/Pagination";
 
-// Componente principal de la página Home
-function Home() {
+// Componente principal de la página pública
+function PublicHome() {
 
-  // Hook para redireccionar entre páginas
-  const navigate = useNavigate();
-
-  // Estado para guardar los vehículos obtenidos del backend
+  // Estado para guardar los vehículos obtenidos
   const [vehicles, setVehicles] = useState([]);
 
-  // Estado para controlar la carga de datos
+  // Estado para controlar si los datos están cargando
   const [loading, setLoading] = useState(true);
 
   // Estado para manejar la paginación
@@ -31,10 +26,10 @@ function Home() {
     totalVehicles: 0
   });
 
-  // Estado para guardar los filtros actuales
+  // Guarda los filtros actuales aplicados
   const [currentFilters, setCurrentFilters] = useState({});
 
-  // Función para cargar los vehículos con filtros y paginación
+  // Función para cargar vehículos con filtros y paginación
   const loadVehicles = async (filters = currentFilters, page = 1) => {
     try {
 
@@ -44,7 +39,7 @@ function Home() {
       // Combina filtros con paginación
       const finalFilters = { ...filters, page, limit: 6 };
 
-      // Llama al servicio del backend
+       // Llama al servicio del backend
       const data = await getVehicles(finalFilters);
 
       // Guarda los vehículos obtenidos
@@ -62,7 +57,6 @@ function Home() {
 
     } catch (error) {
       console.error("Error al cargar vehículos:", error);
-
       // Si ocurre un error limpia la lista
       setVehicles([]);
     } finally {
@@ -71,38 +65,18 @@ function Home() {
       setLoading(false);
     }
   };
-
   // Se ejecuta cuando se carga el componente
   useEffect(() => {
-
-    // Obtiene el token de sesión
-    const token = sessionStorage.getItem("token");
-
-    // Si no hay sesión redirige al login
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     // Carga los vehículos al iniciar la página
     loadVehicles({}, 1);
-
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-100">
 
+      <HeroSection />
+
       <div className="mx-auto max-w-7xl px-6 py-8">
-
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900">
-            Vehículos en venta
-          </h1>
-
-          <p className="mt-2 text-slate-600">
-            Explora los autos disponibles y encuentra el que más te interese.
-          </p>
-        </div>
 
         <VehicleFilters onFilter={(filters) => loadVehicles(filters, 1)} />
 
@@ -138,9 +112,8 @@ function Home() {
         )}
 
       </div>
-
     </div>
   );
 }
 
-export default Home;
+export default PublicHome;

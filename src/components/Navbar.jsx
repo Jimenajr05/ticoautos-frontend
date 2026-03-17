@@ -1,17 +1,35 @@
+// Importa el hook useState para manejar el estado del menú
 import { useState } from "react";
+
+// Importa herramientas de navegación de React Router
 import { Link, useNavigate } from "react-router-dom";
 
+// Componente de la barra de navegación
 function Navbar() {
+
+  // Hook para redireccionar entre páginas
   const navigate = useNavigate();
+
+  // Estado para controlar si el menú desplegable está abierto o cerrado
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Obtiene los datos del usuario guardados en sessionStorage
   const userData = sessionStorage.getItem("user");
+
+  // Convierte los datos del usuario de string a objeto
   const user = userData ? JSON.parse(userData) : null;
 
+  // Función para cerrar sesión
   const handleLogout = () => {
+
+    // Elimina el token y los datos del usuario de la sesión
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
+
+    // Cierra el menú desplegable
     setMenuOpen(false);
+
+    // Redirige al login
     navigate("/login");
   };
 
@@ -23,10 +41,6 @@ function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link to="/" className="transition hover:text-cyan-300">
-            Inicio
-          </Link>
-
           {user ? (
             <div className="relative">
               <button
@@ -38,6 +52,9 @@ function Navbar() {
 
               {menuOpen && (
                 <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg bg-white text-black shadow-lg">
+                  <Link to="/home" className="block px-4 py-3 hover:bg-slate-100">
+                    Inicio
+                  </Link>
                   <Link
                     to="/mis-vehiculos"
                     className="block px-4 py-3 hover:bg-slate-100"

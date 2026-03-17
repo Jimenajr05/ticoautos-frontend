@@ -1,17 +1,34 @@
+// Importa hooks de React
 import { useEffect, useState } from "react";
+
+// Importa herramientas de React Router
 import { useParams, Link, useNavigate } from "react-router-dom";
+
+// Importa el servicio para obtener un vehículo por id
 import { getVehicleById } from "../services/vehicleService";
 
+// Componente para mostrar el detalle de un vehículo
 function VehicleDetail() {
+
+  // Obtiene el id del vehículo desde la URL
   const { id } = useParams();
+
+  // Hook para navegar entre páginas
   const navigate = useNavigate();
 
+  // Estado para guardar la información del vehículo
   const [vehicle, setVehicle] = useState(null);
+
+  // Estado para controlar la carga
   const [loading, setLoading] = useState(true);
+
+  // Estado para mostrar mensaje cuando se copia el enlace
   const [copied, setCopied] = useState(false);
 
+  // Construye la URL pública del vehículo
   const shareUrl = `${window.location.origin}/vehicles/${id}`;
 
+  // Función para cargar el vehículo desde el backend
   const loadVehicle = async () => {
     try {
       setLoading(true);
@@ -25,15 +42,18 @@ function VehicleDetail() {
     }
   };
 
+  // Se ejecuta cuando cambia el id del vehículo
   useEffect(() => {
     loadVehicle();
   }, [id]);
 
+  // Copia el enlace del vehículo al portapapeles
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
 
+      // Oculta el mensaje después de 2 segundos
       setTimeout(() => {
         setCopied(false);
       }, 2000);
@@ -43,17 +63,22 @@ function VehicleDetail() {
     }
   };
 
+  // Maneja el botón para mostrar interés en el vehículo
  const handleInterestClick = () => {
+
+  // Obtiene token y usuario guardados en sesión
   const token = sessionStorage.getItem("token");
   const userData = sessionStorage.getItem("user");
   const user = userData ? JSON.parse(userData) : null;
 
+  // Si no hay sesión iniciada, envía al login
   if (!token || !user) {
     alert("Debes iniciar sesión para contactar al vendedor.");
     navigate("/login");
     return;
   }
 
+  // Obtiene el id del propietario del vehículo
   const ownerId =
     vehicle.user?._id || vehicle.usuario?._id || vehicle.user || vehicle.usuario;
 
@@ -63,9 +88,11 @@ function VehicleDetail() {
     return;
   }
 
+  // Navega al chat enviando el id del vehículo y el id del usuario interesado
   navigate(`/chat?vehicleId=${vehicle._id}&askedBy=${user._id}`);
 };
 
+  // Vista mientras carga la información
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-100 px-6 py-10">

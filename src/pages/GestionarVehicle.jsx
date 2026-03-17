@@ -1,4 +1,7 @@
+// Importa hooks de React
 import { useEffect, useState } from "react";
+
+// Importa funciones del servicio de vehículos para interactuar con el backend
 import {
   createVehicle,
   deleteVehicle,
@@ -6,11 +9,20 @@ import {
   updateVehicle,
   getMyVehicles,
 } from "../services/vehicleService";
+// Importa hook de navegación de React Router
 import { useNavigate } from "react-router-dom";
 
+// Importa componentes reutilizables
+import VehicleForm from "../components/Vehicles/VehicleForm";
+import MyVehicleCard from "../components/Vehicles/MyVehicleCard";
+
+// Componente principal para gestionar vehículos del usuario
 function GestionarVehicle() {
+
+  // Hook para navegar entre páginas
   const navigate = useNavigate();
 
+  // Estado inicial del formulario
   const initialForm = {
     title: "",
     brand: "",
@@ -21,15 +33,22 @@ function GestionarVehicle() {
     vehicleImage: [],
   };
 
+  // Estado del formulario
   const [form, setForm] = useState(initialForm);
+
+  // Lista de vehículos del usuario
   const [vehicles, setVehicles] = useState([]);
+
+  // Guarda el id del vehículo que se está editando
   const [editingVehicleId, setEditingVehicleId] = useState(null);
 
+  // Resetea el formulario
   const resetForm = () => {
     setForm(initialForm);
     setEditingVehicleId(null);
   };
 
+  // Carga los vehículos del usuario desde el backend
   const loadVehicles = async () => {
     try {
       const data = await getMyVehicles();
@@ -39,27 +58,34 @@ function GestionarVehicle() {
     }
   };
 
+  // Se ejecuta cuando se carga el componente
   useEffect(() => {
+    // Obtiene el token de sesión
     const token = sessionStorage.getItem("token");
 
+    // Si no hay token, redirige al login
     if (!token) {
       alert("Debes iniciar sesión para acceder a esta página.");
       navigate("/login");
       return;
     }
 
+    // Carga los vehículos
     loadVehicles();
   }, [navigate]);
 
+  // Maneja cambios en los inputs del formulario
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
+    // Si el campo es imagen, guarda los archivos
     if (name === "vehicleImage") {
       setForm({
         ...form,
         vehicleImage: files,
       });
     } else {
+      // Para los demás campos guarda el valor normal
       setForm({
         ...form,
         [name]: value,
@@ -67,6 +93,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Valida los datos del formulario antes de enviarlos
   const validateForm = () => {
     if (!form.title.trim()) {
       alert("El título del vehículo es obligatorio.");
@@ -88,7 +115,11 @@ function GestionarVehicle() {
       return false;
     }
 
-    if (Number(form.year) < 1900 || Number(form.year) > new Date().getFullYear()) {
+    // Verifica que el año sea válido
+    if (
+      Number(form.year) < 1900 ||
+      Number(form.year) > new Date().getFullYear()
+    ) {
       alert("Ingresa un año válido.");
       return false;
     }
@@ -98,6 +129,7 @@ function GestionarVehicle() {
       return false;
     }
 
+    // Verifica que el precio sea mayor que 0
     if (Number(form.price) <= 0) {
       alert("El precio debe ser mayor a 0.");
       return false;
@@ -108,7 +140,7 @@ function GestionarVehicle() {
       return false;
     }
 
-    // Solo exigir imagen al crear, no al editar
+    // Si se está creando un vehículo nuevo exige imagen
     if (!editingVehicleId && (!form.vehicleImage || form.vehicleImage.length === 0)) {
       alert("Debes subir al menos una foto del vehículo.");
       return false;
@@ -117,8 +149,11 @@ function GestionarVehicle() {
     return true;
   };
 
+  // Construye el FormData para enviar datos y archivos al backend
   const buildFormData = () => {
+
     const formData = new FormData();
+
     formData.append("title", form.title);
     formData.append("brand", form.brand);
     formData.append("model", form.model);
@@ -126,6 +161,7 @@ function GestionarVehicle() {
     formData.append("price", form.price);
     formData.append("description", form.description);
 
+    // Agrega las imágenes al FormData
     if (form.vehicleImage && form.vehicleImage.length > 0) {
       for (let i = 0; i < form.vehicleImage.length; i++) {
         formData.append("vehicleImage", form.vehicleImage[i]);
@@ -135,6 +171,7 @@ function GestionarVehicle() {
     return formData;
   };
 
+  // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -145,14 +182,17 @@ function GestionarVehicle() {
     try {
       const formData = buildFormData();
 
+      // Si se está editando un vehículo
       if (editingVehicleId) {
         await updateVehicle(editingVehicleId, formData);
         alert("Vehículo actualizado correctamente.");
       } else {
+        // Si es un vehículo nuevo
         await createVehicle(formData);
         alert("Vehículo creado correctamente.");
       }
 
+      // Limpia el formulario y recarga la lista
       resetForm();
       await loadVehicles();
     } catch (error) {
@@ -166,6 +206,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Carga los datos de un vehículo en el formulario para editarlo
   const handleEdit = (vehicle) => {
     setForm({
       title: vehicle.title || "",
@@ -178,9 +219,12 @@ function GestionarVehicle() {
     });
 
     setEditingVehicleId(vehicle._id);
+
+    // Hace scroll al inicio de la página
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Elimina un vehículo
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
       "¿Seguro que deseas eliminar este vehículo?"
@@ -198,6 +242,7 @@ function GestionarVehicle() {
     }
   };
 
+  // Marca un vehículo como vendido
   const handleMarkAsSold = async (id) => {
     try {
       await markVehicleAsSold(id);
@@ -212,190 +257,61 @@ function GestionarVehicle() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 px-6 py-10 text-white">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="mb-8 text-4xl font-bold">Gestión de Vehículos</h1>
-
-        <div className="mb-10 rounded-3xl bg-slate-900 p-6 shadow-xl">
-          <h2 className="mb-6 text-2xl font-semibold">
-            {editingVehicleId ? "Editar vehículo" : "Registrar vehículo"}
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-2">
-              <input
-                type="text"
-                name="title"
-                placeholder="Título"
-                value={form.title}
-                onChange={handleChange}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
-
-              <input
-                type="text"
-                name="brand"
-                placeholder="Marca"
-                value={form.brand}
-                onChange={handleChange}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
-
-              <input
-                type="text"
-                name="model"
-                placeholder="Modelo"
-                value={form.model}
-                onChange={handleChange}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
-
-              <input
-                type="number"
-                name="year"
-                placeholder="Año"
-                value={form.year}
-                onChange={handleChange}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
-
-              <input
-                type="number"
-                name="price"
-                placeholder="Precio"
-                value={form.price}
-                onChange={handleChange}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
-            </div>
-
-            <textarea
-              name="description"
-              placeholder="Descripción"
-              value={form.description}
-              onChange={handleChange}
-              rows="4"
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none focus:border-blue-500"
-            />
-
-            <div>
-              <label className="mb-2 block text-sm font-medium">
-                Fotos del vehículo
-              </label>
-              <input
-                type="file"
-                name="vehicleImage"
-                multiple
-                onChange={handleChange}
-                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3"
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-              >
-                {editingVehicleId ? "Actualizar vehículo" : "Crear Vehículo"}
-              </button>
-
-              {editingVehicleId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="rounded-xl bg-slate-700 px-5 py-3 font-semibold text-white transition hover:bg-slate-600"
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </form>
+    <div className="min-h-screen bg-slate-100 px-6 py-10">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold text-slate-900">
+            Gestión de Vehículos
+          </h1>
+          <p className="mt-2 text-slate-600">
+            Registra, edita y administra los vehículos publicados en tu cuenta.
+          </p>
         </div>
 
-        <div>
-          <h2 className="mb-6 text-3xl font-bold">Vehículos Registrados</h2>
+        {/* Formulario de vehículo */}
+        <VehicleForm
+          form={form}
+          editingVehicleId={editingVehicleId}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onCancel={resetForm}
+        />
 
-          {vehicles.length === 0 ? (
-            <div className="rounded-2xl bg-slate-900 p-6 text-slate-300">
-              No tienes vehículos registrados todavía.
-            </div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {vehicles.map((vehicle) => (
-                <div
-                  key={vehicle._id}
-                  className="overflow-hidden rounded-3xl bg-slate-900 shadow-lg"
-                >
-                  <div className="relative">
-                    {vehicle.vehicleImage && vehicle.vehicleImage.length > 0 ? (
-                      <img
-                        src={`http://localhost:3000${vehicle.vehicleImage[0]}`}
-                        alt={vehicle.title}
-                        className="h-56 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-56 items-center justify-center bg-slate-800 text-slate-400">
-                        Sin imagen
-                      </div>
-                    )}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">
+              Vehículos registrados
+            </h2>
+            <p className="mt-1 text-slate-600">
+              Administra tus publicaciones desde aquí.
+            </p>
+          </div>
 
-                    <span
-                      className={`absolute right-4 top-4 rounded-full px-3 py-1 text-sm font-semibold ${
-                        vehicle.status === "sold"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {vehicle.status === "sold" ? "Vendido" : "Disponible"}
-                    </span>
-                  </div>
-
-                  <div className="p-5">
-                    <h3 className="mb-3 text-xl font-bold">{vehicle.title}</h3>
-
-                    <div className="space-y-2 text-sm text-slate-300">
-                      <p><span className="font-semibold">Marca:</span> {vehicle.brand}</p>
-                      <p><span className="font-semibold">Modelo:</span> {vehicle.model}</p>
-                      <p><span className="font-semibold">Año:</span> {vehicle.year}</p>
-                      <p>
-                        <span className="font-semibold">Precio:</span> ₡
-                        {Number(vehicle.price).toLocaleString()}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Descripción:</span> {vehicle.description}
-                      </p>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <button
-                        onClick={() => handleEdit(vehicle)}
-                        className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
-                      >
-                        Editar
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(vehicle._id)}
-                        className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                      >
-                        Eliminar
-                      </button>
-
-                      {vehicle.status !== "sold" && (
-                        <button
-                          onClick={() => handleMarkAsSold(vehicle._id)}
-                          className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                        >
-                          Marcar como vendido
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Contador de vehículos */}
+          <span className="rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow ring-1 ring-slate-200">
+            {vehicles.length} {vehicles.length === 1 ? "vehículo" : "vehículos"}
+          </span>
         </div>
+
+        {vehicles.length === 0 ? (
+          <div className="rounded-3xl bg-white p-8 text-center text-slate-500 shadow ring-1 ring-slate-200">
+            No tienes vehículos registrados todavía.
+          </div>
+        ) : (
+
+          // Lista de vehículos
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {vehicles.map((vehicle) => (
+              <MyVehicleCard
+                key={vehicle._id}
+                vehicle={vehicle}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onMarkAsSold={handleMarkAsSold}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
